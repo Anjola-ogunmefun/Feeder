@@ -1,19 +1,30 @@
 <template>
   <section>
     <div class="container py-3">
-      <div class="card mb-3 px-4" style="">
-        <div class="row g-0">
-          <div class="col-4">
-            <img :src="image" class="img-fluid py-2" alt="restaurant image" />
-          </div>
-          <div class="col-8 inline">
-            <div class="card-body">
-              <h5 class="card-title">{{ name }}</h5>
-                <p>ingredients</p>
+      <!-- <div class="card">
+        <img :src="image" class="img-fluid" alt="image" />
+        <div class="card-body">
+          <h5 class="card-title">{{ name }}</h5>
+                <p>Ingredients</p>
                 <ol class="card-text line-clamp">
                   <li v-for="ing in ingredient" :key="ing">{{ ing }}</li>
                 </ol>
-                <nuxt-link to="#" class="links" @click="uniqueId(uri)">see more..</nuxt-link>
+                  <p class="text-primary" @click="show">see more...</p>
+        </div>
+      </div> -->
+      <div class="card mb-3 px-4" style="">
+        <div class="row g-0">
+          <div class="col-5">
+            <img :src="image" class="img-fluid py-2" alt="restaurant image" />
+          </div>
+          <div class="col-7">
+            <div class="card-body ml">
+              <h5 class="card-title"><strong>{{ name }}</strong></h5>
+                <p>Ingredients</p>
+                <ol class="card-text line-clamp">
+                  <li v-for="(ing, index) in ingredient" :key="index">{{ ing }}</li>
+                </ol>
+                  <p class="text-primary more" @click="show">see more...</p>
             </div>
           </div>
         </div>
@@ -23,30 +34,18 @@
 </template>
 
 <script>
+const axios = require('axios')
+
 export default {
   props: ['name', 'image', 'ingredient', 'mealType', 'cusineType', 'uri'],
-  data(){
-    return{
-      id:''
-    }
-  },
-  methods:{
-    uniqueId(uri){
-      const idArr = uri.split('#')
-      console.log('uri', idArr)
-      this.id = idArr[1]
-      console.log(this.id)
-    }
-  },
-  // mounted(){
-  //   console.log(this.uri)
-  //     const idArr = this.uri.split('#')
-  //     console.log('uri', idArr)
-  //     this.id = idArr[1]
-  //     console.log(this.id)
-  // }
 
-
+  methods: {
+    show() {
+       console.log(this.uri)
+      // $nuxt.$emit('more-details', this.uri)
+       this.$emit('expand-details', this.uri)
+    },
+  },
 }
 </script>
 
@@ -55,21 +54,24 @@ export default {
   display: flex;
   flex: 1;
 }
+.more:hover{
+  cursor: pointer;
+}
+
 img {
   object-fit: cover;
   object-position: center;
   height: 100%;
-  border-radius: 10% !important;
 }
 
-.line-clamp{
-   display: -webkit-box;
+.line-clamp {
+  display: -webkit-box;
   -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;  
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.links{
+.links {
   text-decoration: none;
 }
 
@@ -78,8 +80,11 @@ img {
   .card-title {
     font-size: 28px;
   }
-  .card-text {
+  .card-text,p{
     font-size: 20px;
+  }
+  .ml{
+    margin-left: -10rem;
   }
 }
 </style>

@@ -1,66 +1,32 @@
 <template>
   <main>
-    <!-- <section id="carousel" >
-     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"></button>
-
-  </div>
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="@/assets/images/fried.jpeg" class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="@/assets/images/rice.jpeg" class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="@/assets/images/group-eating.jpg" class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="@/assets/images/bread.jpg" class="d-block w-100 img-fluid" alt="...">
-    </div>
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-    </section> -->
     <transition name="modal">
       <base-dialog v-if="error" @close="error = false" :open="!!error">
-        <h4 class="modal-head text-center">Error</h4>
-        <p>Sorry, address not found.</p>
+        <p class="notFound text-center">Sorry, meal not found. Try again</p>
       </base-dialog>
     </transition>
 
     <section id="top">
       <div class="py-5">
-      <figure class="text-center container">
-        <blockquote class="blockquote">
-          <p class="heading">FEEDER</p>
-        </blockquote>
-        <figcaption class="blockquote-footer sub-heading">
-          Let's help you create up that special meal
-        </figcaption>
-      </figure>
+        <figure class="text-center container">
+          <blockquote class="blockquote">
+            <p class="heading">Meal-prep</p>
+          </blockquote>
+          <figcaption class="blockquote-footer sub-heading notFound">
+            Let's help you bring your meals to life
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <section id="gallery">
       <div class="container py-5">
-        <div class="row">
-            <div class="col-md-12">
+        <div class="row m-b">
+          <div class="col-md-12">
             <img
               src="@/assets/images/woman-cooking.jpeg"
               alt="fried rice"
-              class="img-fluid"
+              class="img-fluid mb-3"
             />
             <!-- <div class="bottom">Cooking hasn't been easier</div> -->
           </div>
@@ -74,11 +40,11 @@
           </div>
           <div class="col-md-3 col-6 embed">
             <img
-              src="@/assets/images/bread.jpg"
+              src="@/assets/images/combo.jpeg"
               alt="bread"
               class="img-fluid enlarge"
             />
-            <div class="bottom">Takeaway deals</div>
+            <!-- <div class="bottom">Takeaway deals</div> -->
           </div>
           <div class="col-md-3 col-6 embed">
             <img
@@ -86,46 +52,85 @@
               alt="white rice"
               class="img-fluid enlarge"
             />
-            <div class="bottom">Dine-in deals</div>
+            <!-- <div class="bottom">Dine-in deals</div> -->
           </div>
         </div>
       </div>
     </section>
 
-    <section id="instrution">
+    <section id="instruction">
       <div class="container">
         <div class="row">
           <div class="col-12 text-center py-5">
             <h3>
-              We love to answer your questions about the meal you would love to try out
+              We love to answer your questions about the meal you want to
+              try out
             </h3>
           </div>
 
-            <input
-              class="form-control form-control-lg mb-5 text-center container"
-              type="text"
-              placeholder="Tell us what you want to cook..."
-              aria-label=".form-control-lg example"
-              v-model="query"
-              @keyup.enter="reqRecipe"
-            />
+          <input
+            class="
+              form-control form-control-lg
+              mb-5
+              text-center
+              container
+              placeholder
+            "
+            type="text"
+            placeholder="Tell us what you want to cook..."
+            aria-label=".form-control-lg example"
+            v-model="query"
+            @change="reqRecipe"
+          />
         </div>
       </div>
     </section>
 
+    <div v-if="isLoading" class="mb-5">
+      <div class="d-flex justify-content-center">
+        <h5><strong>Loading...</strong> &nbsp; &nbsp;</h5>
+        <div class="spinner-border" role="status" aria-hidden="true"></div>
+      </div>
+    </div>
 
-    <section v-if="recipeList.length !=0">
-      <!-- {{recipeList[0]}} -->
-      <recipe-list v-for="recipe in recipeList" :key="recipe.uri"
+    <section v-if="recipeList.length != 0 && !details">
+      <recipe-list
+        v-for="(recipe, index) in recipeList"
+        :key="index.recipe"
         :name="recipe.label"
         :uri="recipe.uri"
         :image="recipe.image"
         :ingredient="recipe.ingredientLines"
         :cusineType="recipe.cusineType"
         :mealType="recipe.mealType"
-        >
-        {{recipe.label}}
+        @expand-details="showDetails"
+      >
       </recipe-list>
+    </section>
+
+      <section v-else>
+      <div class="container mb-2">
+        <div class="row">
+          <video controls loop autoplay muted>
+            <source src="@/assets/video/cooking-video.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="details">
+      <more-details
+        :name="name"
+        :dietLabels="dietLabels"
+        :heathLabels="healthLabels"
+        :cautions="cautions"
+        :mealType="mealType"
+        :dishType="dishType"
+        :ingredients="ingredients"
+        :link="link"
+        :image="image"
+      >
+      </more-details>
     </section>
   </main>
 </template>
@@ -137,25 +142,81 @@ export default {
   data() {
     return {
       query: '',
-      recipeList:[],
+      recipeList: [],
+      details: false,
+      id: '',
+      name: '',
+      dietLabels: [],
+      healthLabels: [],
+      cautions: [],
+      mealType: [],
+      dishType: [],
+      ingredients: [],
+      link: '',
+      image: '',
+      isLoading: false,
       error: null,
     }
   },
 
   methods: {
     async reqRecipe() {
+      this.isLoading = true
       try {
+        this.details = false
+        this.recipeList = []
         const response = await axios.get(
           `https://api.edamam.com/api/recipes/v2?type=public&q=${this.query}&app_id=abb2f4d9&app_key=%20f495acc1dfcdca5525d3f6cc7cf86997`
         )
         const responseData = response.data.hits
-        for(const key in responseData){
-          this.recipeList.push(responseData[key].recipe)
-        console.log(responseData[key].recipe)
+        if (responseData.length <= 0) {
+          this.isLoading = false
+          this.error = true
+          throw new Error('meal not found')
         }
-        console.log(typeof this.recipeList)
+        console.log(responseData)
+
+        for (const key in responseData) {
+          this.recipeList.push(responseData[key].recipe)
+          console.log(this.recipeList)
+        }
+        this.isLoading = false
       } catch (error) {
-        console.error(error)
+        this.isLoading = false
+        this.error = true
+        // throw new Error('Something went wrong')
+      }
+    },
+
+    async showDetails(uri) {
+      this.details = true
+      this.isLoading = true
+      const idArr = uri.split('#')
+      console.log('uri', idArr)
+      this.id = idArr[1]
+      console.log(this.id, 'id')
+      try {
+        const response = await axios.get(
+          `https://api.edamam.com/api/recipes/v2/${this.id}?type=public&app_id=abb2f4d9&app_key=f495acc1dfcdca5525d3f6cc7cf86997`
+        )
+        const recipe = response.data.recipe
+        this.name = recipe.label
+        this.dietLabels = recipe.dietLabels
+        this.healthLabels = recipe.healthLabels
+        this.cautions = recipe.cautions
+        this.mealType = recipe.mealType
+        this.dishType = recipe.dishType
+        this.ingredients = recipe.ingredientLines
+        this.link = recipe.url
+        this.image = recipe.image
+
+        this.isLoading = false
+        console.log(recipe)
+      } catch (error) {
+        this.isLoading = false
+        this.error = true
+        error = new Error('Something went wrong')
+        throw error
       }
     },
   },
@@ -170,6 +231,7 @@ main {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-family: 'Arvo', serif;
+  overflow-x: hidden;
 }
 
 .heading {
@@ -181,7 +243,6 @@ main {
 }
 img {
   border-radius: 5%;
-  margin: 20px 0px;
 }
 .enlarge {
   object-fit: cover;
@@ -201,11 +262,11 @@ img {
   color: #ffb703;
   box-shadow: inset 0 0 0 2000px rgba(15, 1, 9, 0.4);
 }
-.m-b{
+.m-b {
   margin-bottom: -30px;
 }
 .modal-head {
-  background: #ffb703;
+  background: #0077b6;
   color: white;
 }
 
@@ -213,30 +274,47 @@ section:nth-last-child(odd) {
   background: #e2eafc;
 }
 
-
-
 /* --------------------------------------
    Media Queries
    -------------------------------------- */
 
 /*  Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) {
-
+  .notFound {
+    font-size: 1.2rem;
+  }
 }
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
+  .enlarge {
+    margin-top: 8px;
+    height: 11rem;
+  }
+
+  .placeholder {
+    font-size: 1.5rem;
+  }
 }
 
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {
   .enlarge {
-    margin-top: 20px;
+    margin-top: 5px;
     height: 22rem;
+  }
+  h3 {
+    font-size: 2rem;
   }
   .bottom {
     font-size: 22px;
     bottom: 60px;
+  }
+  .placeholder {
+    font-size: 1.8rem;
+  }
+  .notFound {
+    font-size: 1.5rem;
   }
 }
 
